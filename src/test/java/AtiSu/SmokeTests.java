@@ -1,5 +1,6 @@
 package AtiSu;
 
+import io.restassured.http.ContentType;
 import org.assertj.core.api.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -8,6 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import pages.GoogleSteps;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Configuration.baseUrl;
@@ -108,6 +112,20 @@ public class SmokeTests extends TestBase {
                 .then()
                 .log().status()
                 .log().body()
+                .statusCode(401);
+    }
+    @Test
+    @DisplayName("Проверка негативной авторизации и возвращения статус-кода 401 в ответе")
+    void apiTest03() {
+        Map<String, String> user = new HashMap<>();
+        user.put("login", "1234");
+        user.put("password", "79999999999");
+        given()
+                .body(user)
+                .contentType(ContentType.JSON)
+                .when().log().all()
+                .post("https://id.ati.su/api/auth/?encode=true")
+                .then().log().all()
                 .statusCode(401);
     }
 
