@@ -1,15 +1,12 @@
 package AtiSu;
 
 import io.restassured.http.ContentType;
-import org.assertj.core.api.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import pages.GoogleSteps;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,11 +16,7 @@ import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
-import static io.restassured.http.ContentType.JSON;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.is;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 
 public class SmokeTests extends TestBase {
 
@@ -31,7 +24,7 @@ public class SmokeTests extends TestBase {
 
     @Tag("smokeTest")
     @Test
-    @DisplayName("Автоматизация скрипта проверки сайта ati.su")
+    @DisplayName("Автоматизация скрипта проверки нахождения ati.su в гугле")
     void mainPageTest() {
         step("Открыть популярный сайт-поисковик https://www.google.ru/", () -> {
             open(baseUrl);
@@ -56,7 +49,7 @@ public class SmokeTests extends TestBase {
         });
     }
 
-    @Test
+    @DisplayName("Проверка отображения результатов в разделах сайта")
     @CsvSource(value = {
             "Грузы, Поиск грузов",
             "Транспорт, Поиск транспорта",
@@ -75,48 +68,14 @@ public class SmokeTests extends TestBase {
         });
     }
 
-    @Test
-    @DisplayName("Проверка негативной авторизации и возвращения статус-кода 401 в ответе")
-    void apiTest01() {
-        String body = "{\"login\":\"1234\",\"password\":\"1234\",\"remember\":false,\"captcha\":null}";
 
-        given()
-                .log().uri()
-                .log().body()
-                .body(body)
-                .contentType(JSON)
-                .when()
-                .post("https://id.ati.su/api/auth/?encode=true")
-                .then()
-                .log().status()
-                .log().body()
-                .statusCode(401);
-    }
     @Test
     @DisplayName("Проверка негативной авторизации и возвращения статус-кода 401 в ответе")
-    void apiTest02() {
+    void apiTest() {
         String body = "{\n" +
                 "    \"error\": \"unauthorized\",\n" +
                 "    \"reason\": \"Обновите страницу. Если ошибка повторится, обратитесь в техподдержку\"\n" +
                 "}";
-
-        given()
-                .formParam("login","123")
-                .formParam("password","123")
-                .log().all()
-                .log().body()
-                .body(body)
-                .contentType(JSON)
-                .when().log().all()
-                .post("https://id.ati.su/api/auth/?encode=true")
-                .then()
-                .log().status()
-                .log().body()
-                .statusCode(401);
-    }
-    @Test
-    @DisplayName("Проверка негативной авторизации и возвращения статус-кода 401 в ответе")
-    void apiTest03() {
         Map<String, String> user = new HashMap<>();
         user.put("login", "1234");
         user.put("password", "79999999999");
@@ -127,20 +86,6 @@ public class SmokeTests extends TestBase {
                 .post("https://id.ati.su/api/auth/?encode=true")
                 .then().log().all()
                 .statusCode(401);
-    }
-
-    @Test
-    void proverkaLocator() {
-        step("Открыть главную страницу ati.su", () -> {
-            open("https://ati.su/");
-        });
-        step("Выбрать на странице искомый раздел", () -> {
-           // $(".AtiHeader__main-menu____tRP5").$(byText("Грузы")).click();
-            $("[data-name=main-menu-links]").$(byText("Грузы")).click();
-        });
-        step("Убедиться, что при переходе в искомый раздел, отображается ожидаемый результат", () -> {
-            $$("[class=Search_container__JXJhz]").find(text("Поиск грузов")).shouldBe(visible);
-        });
     }
 }
 
